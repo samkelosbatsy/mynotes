@@ -100,9 +100,9 @@ class _LoginViewState extends State<LoginView> {
                           } else if (e.code == 'invalid-email') {
                             message = 'Invalid email address';
                           }
-                          _showSnackBar(message);
+                          await showErrorDialog(context, message);
                         } catch (e) {
-                          _showSnackBar('Error: $e');
+                          await showErrorDialog(context, 'Error: $e');
                         }
                       },
 
@@ -130,4 +130,21 @@ class _LoginViewState extends State<LoginView> {
       ),
     );
   }
+}
+
+Future<void> showErrorDialog(BuildContext context, String errorMessage) {
+  return showDialog<void>(
+    context: context,
+    builder:
+        (context) => AlertDialog(
+          title: const Text('Login Error'),
+          content: Text(errorMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+  );
 }
