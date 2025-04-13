@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:my_flutter_app/constant.dart';
 import 'package:my_flutter_app/firebase_options.dart';
 
 class LoginView extends StatefulWidget {
@@ -86,8 +87,10 @@ class _LoginViewState extends State<LoginView> {
                             "Logged in successfully: ${userCredential.user?.email}",
                           );
 
-                          // Navigate to another page if needed
-                          // Navigator.push(context, MaterialPageRoute(builder: (_) => DashboardPage()));
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            NotesRoute,
+                            (route) => false,
+                          );
                         } on FirebaseAuthException catch (e) {
                           String message = 'Login failed: ${e.message}';
                           if (e.code == 'user-not-found') {
@@ -102,12 +105,13 @@ class _LoginViewState extends State<LoginView> {
                           _showSnackBar('Error: $e');
                         }
                       },
+
                       child: const Text('Login'),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).pushNamedAndRemoveUntil(
-                          '/register/',
+                          RegisterRoute,
                           (route) => false,
                         );
                       },
