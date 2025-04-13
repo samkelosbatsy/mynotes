@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:my_flutter_app/constant.dart';
 import 'package:my_flutter_app/firebase_options.dart';
+import 'package:my_flutter_app/utilites/show_error_dialog.log.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -88,6 +89,7 @@ class _RegisterViewState extends State<RegisterView> {
                             _showSnackBar(
                               "Registered successfully: ${userCredential.user?.email}",
                             );
+                            Navigator.of(context).pushNamed(VerifyEmailRoute);
                           } on FirebaseAuthException catch (e) {
                             String message =
                                 'Registration failed: ${e.message}';
@@ -99,9 +101,9 @@ class _RegisterViewState extends State<RegisterView> {
                             } else if (e.code == 'invalid-email') {
                               message = 'Invalid email address';
                             }
-                            _showSnackBar(message);
+                            await showErrorDialog(context, message);
                           } catch (e) {
-                            _showSnackBar('Error: $e');
+                            await showErrorDialog(context, 'Error: $e');
                           }
                         },
                         child: const Text('Register'),

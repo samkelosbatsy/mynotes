@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:my_flutter_app/constant.dart';
 import 'package:my_flutter_app/firebase_options.dart';
+import 'package:my_flutter_app/utilites/show_error_dialog.log.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -87,10 +88,18 @@ class _LoginViewState extends State<LoginView> {
                             "Logged in successfully: ${userCredential.user?.email}",
                           );
 
-                          Navigator.of(context).pushNamedAndRemoveUntil(
-                            NotesRoute,
-                            (route) => false,
-                          );
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user?.emailVerified ?? false) {
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              NotesRoute,
+                              (route) => false,
+                            );
+                          } else {
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              VerifyEmailRoute,
+                              (route) => false,
+                            );
+                          }
                         } on FirebaseAuthException catch (e) {
                           String message = 'Login failed: ${e.message}';
                           if (e.code == 'user-not-found') {
@@ -130,21 +139,4 @@ class _LoginViewState extends State<LoginView> {
       ),
     );
   }
-}
-
-Future<void> showErrorDialog(BuildContext context, String errorMessage) {
-  return showDialog<void>(
-    context: context,
-    builder:
-        (context) => AlertDialog(
-          title: const Text('Login Error'),
-          content: Text(errorMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-  );
 }
