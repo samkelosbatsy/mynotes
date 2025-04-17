@@ -3,20 +3,14 @@
 import 'package:my_flutter_app/services/auth/auth_user.dart';
 
 abstract class AuthProvider {
+  Future<void> initialize();
   AuthUser? get currentUser;
-
   Future<AuthUser> logIn({required String email, required String password});
-
   Future<AuthUser> createUser({
     required String email,
     required String password,
   });
-
   Future<void> logOut();
-
   Future<void> sendEmailVerification();
-
-  // Recommended additional methods
-  // Future<void> sendPasswordResetEmail(String email);
-  //Future<void> reloadUser();
+  Future<void> sendPasswordReset({required String toEmail});
 }

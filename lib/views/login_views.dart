@@ -1,8 +1,7 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:my_flutter_app/constant.dart';
-import 'package:my_flutter_app/firebase_options.dart';
+import 'package:my_flutter_app/services/auth/auth_exceptions.dart';
+import 'package:my_flutter_app/services/auth/auth_services.dart';
 import 'package:my_flutter_app/utilites/show_error_dialog.log.dart';
 
 class LoginView extends StatefulWidget {
@@ -38,9 +37,7 @@ class _LoginViewState extends State<LoginView> {
         centerTitle: true,
       ),
       body: FutureBuilder(
-        future: Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        ),
+        future: AuthService.firebase().initialize(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
@@ -78,18 +75,13 @@ class _LoginViewState extends State<LoginView> {
                         }
 
                         try {
-                          final userCredential = await FirebaseAuth.instance
-                              .signInWithEmailAndPassword(
-                                email: email,
-                                password: password,
-                              );
-
-                          _showSnackBar(
-                            "Logged in successfully: ${userCredential.user?.email}",
+                          await AuthService.firebase().logIn(
+                            email: email,
+                            password: password,
                           );
 
-                          final user = FirebaseAuth.instance.currentUser;
-                          if (user?.emailVerified ?? false) {
+                          final user = AuthService.firebase().currentUser;
+                          if (user?.isEmailVerified ?? false) {
                             Navigator.of(context).pushNamedAndRemoveUntil(
                               NotesRoute,
                               (route) => false,
@@ -100,18 +92,25 @@ class _LoginViewState extends State<LoginView> {
                               (route) => false,
                             );
                           }
-                        } on FirebaseAuthException catch (e) {
-                          String message = 'Login failed: ${e.message}';
-                          if (e.code == 'user-not-found') {
-                            message = 'No user found with this email';
-                          } else if (e.code == 'wrong-password') {
-                            message = 'Incorrect password';
-                          } else if (e.code == 'invalid-email') {
-                            message = 'Invalid email address';
-                          }
-                          await showErrorDialog(context, message);
-                        } catch (e) {
-                          await showErrorDialog(context, 'Error: $e');
+
+                          // Your registration logic here
+                        } on UserNotFoundAuthException {
+                          await showErrorDialog(
+                            context,
+                            'No user found with that email',
+                          );
+                        } on WrongPasswordAuthException {
+                          await showErrorDialog(context, 'Incorrect password');
+                        } on InvalidEmailAuthException {
+                          await showErrorDialog(
+                            context,
+                            'Invalid email address',
+                          );
+                        } on GenericAuthException catch (e) {
+                          await showErrorDialog(
+                            context,
+                            'Login failed: ${e.toString()}',
+                          );
                         }
                       },
 
